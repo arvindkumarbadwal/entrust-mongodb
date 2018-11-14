@@ -1,4 +1,4 @@
-<?php namespace Arvindkumar\EntrustMongoDB\Entrust;
+<?php namespace Arvindkumar\EntrustMongoDB;
 
 /**
  * This file is part of Entrust,
