@@ -29,16 +29,6 @@
             "Arvindkumar\\EntrustMongoDB\\": "src/Entrust/"
         }
     },
-    "extra":{
-        "laravel":{
-            "providers":[
-                "Arvindkumar\\EntrustMongoDB\\Entrust\\EntrustServiceProvider"
-            ],
-            "aliases":{
-                "EntrustMongoDB": "Arvindkumar\\EntrustMongoDB\\Entrust\\EntrustFacade"
-            }
-        }
-    },
     "autoload-dev": {
         "classmap": [
             "tests/Middleware/MiddlewareTest.php"
