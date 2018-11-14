@@ -5,7 +5,6 @@
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Configuration](#configuration)
-    - [User relation to roles](#user-relation-to-roles)
     - [Models](#models)
         - [Role](#role)
         - [Permission](#permission)
@@ -46,7 +45,7 @@ Arvindkumar\EntrustMongoDB\EntrustServiceProvider::class,
 3) In the same `config/app.php` and add the following to the `aliases ` array: 
 
 ```php
-'Entrust'   => Arvindkumar\EntrustMongoDB\EntrustFacade::class,
+'EntrustMongoDB'   => Arvindkumar\EntrustMongoDB\EntrustFacade::class,
 ```
 
 4) Run the command below to publish the package config file `config/entrust.php`:
@@ -83,27 +82,6 @@ Set the property values in the `config/auth.php`.
 These values will be used by entrust to refer to the correct user table and model.
 
 To further customize table names and model namespaces, edit the `config/entrust.php`.
-
-### User relation to roles
-
-Now generate the Entrust migration:
-
-```bash
-php artisan entrust:migration
-```
-
-It will generate the `<timestamp>_entrust_setup_tables.php` migration.
-You may now run it with the artisan migrate command:
-
-```bash
-php artisan migrate
-```
-
-After the migration, four new tables will be present:
-- `roles` &mdash; stores role records
-- `permissions` &mdash; stores permission records
-- `role_user` &mdash; stores [many-to-many](http://laravel.com/docs/4.2/eloquent#many-to-many) relations between roles and users
-- `permission_role` &mdash; stores [many-to-many](http://laravel.com/docs/4.2/eloquent#many-to-many) relations between roles and permissions
 
 ### Models
 
@@ -283,8 +261,8 @@ You can have as many `Role`s as you want for each `User` and vice versa.
 The `Entrust` class has shortcuts to both `can()` and `hasRole()` for the currently logged in user:
 
 ```php
-Entrust::hasRole('role-name');
-Entrust::can('permission-name');
+EntrustMongoDB::hasRole('role-name');
+EntrustMongoDB::can('permission-name');
 
 // is identical to
 
@@ -371,7 +349,7 @@ var_dump($allValidations);
 The `Entrust` class has a shortcut to `ability()` for the currently logged in user:
 
 ```php
-Entrust::ability('admin,owner', 'create-post,edit-user');
+EntrustMongoDB::ability('admin,owner', 'create-post,edit-user');
 
 // is identical to
 
@@ -385,18 +363,18 @@ Three directives are available for use within your Blade templates. What you giv
 ```php
 @role('admin')
     <p>This is visible to users with the admin role. Gets translated to 
-    \Entrust::role('admin')</p>
+    \EntrustMongoDB::role('admin')</p>
 @endrole
 
 @permission('manage-admins')
     <p>This is visible to users with the given permissions. Gets translated to 
-    \Entrust::can('manage-admins'). The @can directive is already taken by core 
+    \EntrustMongoDB::can('manage-admins'). The @can directive is already taken by core 
     laravel authorization package, hence the @permission directive instead.</p>
 @endpermission
 
 @ability('admin,owner', 'create-post,edit-user')
     <p>This is visible to users with the given abilities. Gets translated to 
-    \Entrust::ability('admin,owner', 'create-post,edit-user')</p>
+    \EntrustMongoDB::ability('admin,owner', 'create-post,edit-user')</p>
 @endability
 ```
 
@@ -431,15 +409,15 @@ To filter a route by permission or role you can call the following in your `app/
 
 ```php
 // only users with roles that have the 'manage_posts' permission will be able to access any route within admin/post
-Entrust::routeNeedsPermission('admin/post*', 'create-post');
+EntrustMongoDB::routeNeedsPermission('admin/post*', 'create-post');
 
 // only owners will have access to routes within admin/advanced
-Entrust::routeNeedsRole('admin/advanced*', 'owner');
+EntrustMongoDB::routeNeedsRole('admin/advanced*', 'owner');
 
 // optionally the second parameter can be an array of permissions or roles
 // user would need to match all roles or permissions for that route
-Entrust::routeNeedsPermission('admin/post*', array('create-post', 'edit-comment'));
-Entrust::routeNeedsRole('admin/advanced*', array('owner','writer'));
+EntrustMongoDB::routeNeedsPermission('admin/post*', array('create-post', 'edit-comment'));
+EntrustMongoDB::routeNeedsRole('admin/advanced*', array('owner','writer'));
 ```
 
 Both of these methods accept a third parameter.
@@ -447,7 +425,7 @@ If the third parameter is null then the return of a prohibited access will be `A
 So you can use it like:
 
 ```php
-Entrust::routeNeedsRole('admin/advanced*', 'owner', Redirect::to('/home'));
+EntrustMongoDB::routeNeedsRole('admin/advanced*', 'owner', Redirect::to('/home'));
 ```
 
 Furthermore both of these methods accept a fourth parameter.
@@ -457,14 +435,14 @@ Useful for admin applications where you want to allow access for multiple groups
 
 ```php
 // if a user has 'create-post', 'edit-comment', or both they will have access
-Entrust::routeNeedsPermission('admin/post*', array('create-post', 'edit-comment'), null, false);
+EntrustMongoDB::routeNeedsPermission('admin/post*', array('create-post', 'edit-comment'), null, false);
 
 // if a user is a member of 'owner', 'writer', or both they will have access
-Entrust::routeNeedsRole('admin/advanced*', array('owner','writer'), null, false);
+EntrustMongoDB::routeNeedsRole('admin/advanced*', array('owner','writer'), null, false);
 
 // if a user is a member of 'owner', 'writer', or both, or user has 'create-post', 'edit-comment' they will have access
 // if the 4th parameter is true then the user must be a member of Role and must have Permission
-Entrust::routeNeedsRoleOrPermission(
+EntrustMongoDB::routeNeedsRoleOrPermission(
     'admin/advanced*',
     array('owner', 'writer'),
     array('create-post', 'edit-comment'),
@@ -475,13 +453,13 @@ Entrust::routeNeedsRoleOrPermission(
 
 ### Route filter
 
-Entrust roles/permissions can be used in filters by simply using the `can` and `hasRole` methods from within the Facade:
+Entrust Mongo DB roles/permissions can be used in filters by simply using the `can` and `hasRole` methods from within the Facade:
 
 ```php
 Route::filter('manage_posts', function()
 {
     // check the current user
-    if (!Entrust::can('create-post')) {
+    if (!EntrustMongoDB::can('create-post')) {
         return Redirect::to('admin');
     }
 });
@@ -496,7 +474,7 @@ Using a filter to check for a role:
 Route::filter('owner_role', function()
 {
     // check the current user
-    if (!Entrust::hasRole('Owner')) {
+    if (!EntrustMongoDB::hasRole('Owner')) {
         App::abort(403);
     }
 });
@@ -505,5 +483,5 @@ Route::filter('owner_role', function()
 Route::when('admin/advanced*', 'owner_role');
 ```
 
-As you can see `Entrust::hasRole()` and `Entrust::can()` checks if the user is logged in, and then if he or she has the role or permission.
+As you can see `EntrustMongoDB::hasRole()` and `EntrustMongoDB::can()` checks if the user is logged in, and then if he or she has the role or permission.
 If the user is not logged the return will also be `false`.
